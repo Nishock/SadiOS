@@ -10,6 +10,7 @@ const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const { v4: uuidv4 } = require("uuid");
 const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 8001;
@@ -574,6 +575,49 @@ publicRouter.post("/invitations/:slug/rsvp", wrap(async (req, res) => {
     { $setOnInsert: { id: uuidv4(), wedding_id: inv.wedding_id, name, mobile, relation: "Guest", side: "both", family: "", rsvp_status, plus_ones: Number(plus_ones), is_vip: false, is_elderly: false, created_at: nowISO() } },
     { upsert: true }
   );
+  res.json({ ok: true });
+}));
+
+publicRouter.post("/contact", wrap(async (req, res) => {
+  const { name, email, message } = req.body;
+  if (!name || !email || !message) {
+    return res.status(400).json({ detail: "Name, email, and message are required." });
+  }
+
+  const host = process.env.SMTP_HOST;
+  const port = parseInt(process.env.SMTP_PORT || "587");
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (!host || !user || !pass) {
+    console.warn("[nodemailer] SMTP credentials are not set. Logging submission instead:");
+    console.log(`[contact] Submission from ${name} <${email}>: ${message}`);
+    return res.json({ ok: true, detail: "Message received (Development Mock)" });
+  }
+
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user, pass },
+  });
+
+  const mailOptions = {
+    from: `"${name}" <${email}>`,
+    to: "kumarjigyansh96@gmail.com",
+    subject: `ShaadiOS Contact Form Submission from ${name}`,
+    text: `You have received a new contact submission from ShaadiOS:\n\nName: ${name}\nEmail: ${email}\nMessage: ${message}`,
+    html: `
+      <h3>New Contact Submission</h3>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Message:</strong> ${message}</p>
+    `,
+    replyTo: email,
+  };
+
+  await transporter.sendMail(mailOptions);
+  console.log(`[nodemailer] Sent contact email from ${email}`);
   res.json({ ok: true });
 }));
 

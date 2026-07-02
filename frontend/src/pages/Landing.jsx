@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Users, Calculator, Store, Wallet, Mail, Bot, ArrowRight, Heart, Check } from "lucide-react";
+import { toast } from "sonner";
+import { api } from "@/lib/api";
 
 const FEATURES = [
   { icon: Users, title: "Guest Management", desc: "Family-wise grouping, RSVP tracking, plus-ones — all in one elegant register." },
@@ -13,6 +16,28 @@ const FEATURES = [
 ];
 
 export default function Landing() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await api.post("/public/contact", { name, email, message });
+      toast.success("Thank you! Your message has been sent successfully.");
+      setName("");
+      setEmail("");
+      setMessage("");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.detail || "Failed to send message. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-stone-900">
       {/* NAV */}
@@ -26,12 +51,12 @@ export default function Landing() {
             <a href="#features" className="link-underline">Features</a>
             <a href="#how" className="link-underline">How it works</a>
             <a href="#pricing" className="link-underline">Pricing</a>
+            <a href="#contact" className="link-underline">Contact Us</a>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/login" data-testid="nav-login-link" className="text-sm font-medium text-stone-700 hover:text-[#881337]">Log in</Link>
-            <Link to="/signup" data-testid="nav-signup-button">
-              <Button className="bg-stone-900 hover:bg-stone-800 text-white rounded-full px-5">Start free</Button>
-            </Link>
+            <a href="#contact">
+              <Button className="bg-stone-900 hover:bg-stone-800 text-white rounded-full px-5">Contact Us</Button>
+            </a>
           </div>
         </div>
       </nav>
@@ -50,11 +75,11 @@ export default function Landing() {
               From the first RSVP to the last laddoo — ShaadiOS brings every Indian wedding under one beautifully crafted dashboard. Six specialist AI agents. Smart analytics. Real intelligence — not just a chatbot.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
-              <Link to="/signup" data-testid="hero-get-started-button">
+              <a href="#contact">
                 <Button className="bg-[#881337] hover:bg-[#6f0f2d] text-white rounded-full px-7 py-6 text-base">
-                  Start planning free <ArrowRight className="ml-2 w-4 h-4" />
+                  Get in touch <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
-              </Link>
+              </a>
               <a href="#features">
                 <Button variant="outline" className="rounded-full px-7 py-6 text-base border-stone-300">
                   Explore features
@@ -162,14 +187,68 @@ export default function Landing() {
                     <li key={f} className="flex items-center gap-2"><Check className="w-4 h-4 text-[#A3B18A]" />{f}</li>
                   ))}
                 </ul>
-                <Link to="/signup" className="block mt-8">
+                <a href="#contact" className="block mt-8">
                   <Button data-testid={`pricing-${p.name.toLowerCase()}-button`} className={`w-full rounded-full ${p.popular ? "bg-stone-900 hover:bg-stone-800 text-white" : "bg-white text-stone-900 hover:bg-stone-100"}`}>
-                    Choose {p.name}
+                    Inquire for {p.name}
                   </Button>
-                </Link>
+                </a>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* CONTACT */}
+      <section id="contact" className="py-24 bg-[#FAF9F6] border-t border-stone-200">
+        <div className="max-w-3xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <p className="uppercase tracking-[0.25em] text-xs font-semibold text-[#881337] mb-4">Contact Us</p>
+            <h2 className="font-serif text-4xl sm:text-5xl tracking-tight">Let's craft your celebration.</h2>
+            <p className="text-stone-600 mt-4">Have questions about pricing, features, or custom integrations? Drop us a line and our team will get back to you.</p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 sm:p-10 rounded-2xl border border-stone-200 shadow-sm">
+            <div className="grid sm:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium text-stone-700">Your Name</label>
+                <input
+                  type="text"
+                  id="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Rahul Sharma"
+                  className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#881337]/20 focus:border-[#881337] transition"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium text-stone-700">Email Address</label>
+                <input
+                  type="email"
+                  id="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="e.g. rahul@example.com"
+                  className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#881337]/20 focus:border-[#881337] transition"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="message" className="text-sm font-medium text-stone-700">Message</label>
+              <textarea
+                id="message"
+                required
+                rows={5}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="How can we help you plan your dream wedding?"
+                className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#881337]/20 focus:border-[#881337] transition resize-none"
+              />
+            </div>
+            <Button type="submit" disabled={submitting} className="w-full bg-[#881337] hover:bg-[#6f0f2d] text-white rounded-full py-6 text-base font-medium transition">
+              {submitting ? "Sending..." : "Send Message"}
+            </Button>
+          </form>
         </div>
       </section>
 
