@@ -14,8 +14,8 @@ const nodemailer = require("nodemailer");
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 8001;
-const MONGO_URL = process.env.MONGO_URL || "mongodb://localhost:27017";
-const DB_NAME = process.env.DB_NAME || "shaadios";
+const MONGO_URL = process.env.MONGO_URL || "mongodb+srv://nishock03:12345@cluster0.2uveg4c.mongodb.net/planit?retryWrites=true&w=majority&appName=Cluster0";
+const DB_NAME = process.env.DB_NAME || "planit";
 const JWT_SECRET = process.env.JWT_SECRET || "shaadios_secret";
 const JWT_HOURS = parseInt(process.env.JWT_EXPIRY_HOURS || "168");
 
@@ -23,6 +23,7 @@ const JWT_HOURS = parseInt(process.env.JWT_EXPIRY_HOURS || "168");
 // Cached client for serverless warm starts — avoids reconnecting on every request
 let cachedClient = null;
 let cachedDb = null;
+let db = null;
 
 async function connectDB() {
   if (cachedDb) {
