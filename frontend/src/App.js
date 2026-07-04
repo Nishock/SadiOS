@@ -36,11 +36,24 @@ function App() {
           <Toaster position="top-right" richColors />
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Navigate to="/" replace />} />
-            <Route path="/signup" element={<Navigate to="/" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/invite/:slug" element={<PublicInvite />} />
-            <Route path="/setup" element={<Navigate to="/" replace />} />
-            <Route path="/app/*" element={<Navigate to="/" replace />} />
+            <Route path="/setup" element={<Protected><WeddingSetup /></Protected>} />
+            <Route path="/app" element={<Protected><DashboardLayout /></Protected>}>
+              <Route index element={<Dashboard />} />
+              <Route path="guests" element={<Guests />} />
+              <Route path="headcount" element={<Headcount />} />
+              <Route path="vendors" element={<Vendors />} />
+              <Route path="budget" element={<Budget />} />
+              <Route path="invitations" element={<Invitations />} />
+              <Route path="timeline" element={<Timeline />} />
+              <Route path="hub" element={<Hub />} />
+              <Route path="accommodation" element={<Accommodation />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="agents" element={<Agents />} />
+              <Route path="assistant" element={<Assistant />} />
+            </Route>
           </Routes>
         </BrowserRouter>
       </AuthProvider>

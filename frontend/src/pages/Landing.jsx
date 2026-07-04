@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Users, Calculator, Store, Wallet, Mail, Bot, ArrowRight, Heart, Check } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 const FEATURES = [
   { icon: Users, title: "Guest Management", desc: "Family-wise grouping, RSVP tracking, plus-ones — all in one elegant register." },
@@ -16,6 +17,7 @@ const FEATURES = [
 ];
 
 export default function Landing() {
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -54,9 +56,18 @@ export default function Landing() {
             <a href="#contact" className="link-underline">Contact Us</a>
           </div>
           <div className="flex items-center gap-3">
-            <a href="#contact">
-              <Button className="bg-stone-900 hover:bg-stone-800 text-white rounded-full px-5">Contact Us</Button>
-            </a>
+            {user ? (
+              <Link to="/app" data-testid="home-emergent-link">
+                <Button className="bg-[#881337] hover:bg-[#6f0f2d] text-white rounded-full px-5">Dashboard</Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" data-testid="nav-login-link" className="text-sm font-medium text-stone-700 hover:text-[#881337] mr-2">Log in</Link>
+                <Link to="/signup" data-testid="nav-signup-button">
+                  <Button className="bg-stone-900 hover:bg-stone-800 text-white rounded-full px-5">Start free</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -75,11 +86,19 @@ export default function Landing() {
               From the first RSVP to the last laddoo — ShaadiOS brings every Indian wedding under one beautifully crafted dashboard. Six specialist AI agents. Smart analytics. Real intelligence — not just a chatbot.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
-              <a href="#contact">
-                <Button className="bg-[#881337] hover:bg-[#6f0f2d] text-white rounded-full px-7 py-6 text-base">
-                  Get in touch <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </a>
+              {user ? (
+                <Link to="/app" data-testid="hero-get-started-button">
+                  <Button className="bg-[#881337] hover:bg-[#6f0f2d] text-white rounded-full px-7 py-6 text-base">
+                    Go to Dashboard <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+              ) : (
+                <Link to="/signup" data-testid="hero-get-started-button">
+                  <Button className="bg-[#881337] hover:bg-[#6f0f2d] text-white rounded-full px-7 py-6 text-base">
+                    Start planning free <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+              )}
               <a href="#features">
                 <Button variant="outline" className="rounded-full px-7 py-6 text-base border-stone-300">
                   Explore features
@@ -187,11 +206,11 @@ export default function Landing() {
                     <li key={f} className="flex items-center gap-2"><Check className="w-4 h-4 text-[#A3B18A]" />{f}</li>
                   ))}
                 </ul>
-                <a href="#contact" className="block mt-8">
+                <Link to={user ? "/app" : "/signup"} className="block mt-8">
                   <Button data-testid={`pricing-${p.name.toLowerCase()}-button`} className={`w-full rounded-full ${p.popular ? "bg-stone-900 hover:bg-stone-800 text-white" : "bg-white text-stone-900 hover:bg-stone-100"}`}>
-                    Inquire for {p.name}
+                    {user ? "Go to Dashboard" : `Choose ${p.name}`}
                   </Button>
-                </a>
+                </Link>
               </div>
             ))}
           </div>
